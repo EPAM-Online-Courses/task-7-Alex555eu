@@ -1,8 +1,12 @@
 package efs.task.reflection;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 
 public class ClassInspector {
 
@@ -17,8 +21,14 @@ public class ClassInspector {
    */
   public static Collection<String> getAnnotatedFields(final Class<?> type,
       final Class<? extends Annotation> annotation) {
-    //TODO usuń zawartość tej metody i umieść tutaj swoje rozwiązanie
-    return Collections.emptyList();
+    Field[] fields = type.getDeclaredFields();
+    HashSet<String> fieldNames = new HashSet<>();
+    for(Field field : fields) {
+      if(field.isAnnotationPresent(annotation)) {
+        fieldNames.add(field.getName());
+      }
+    }
+    return fieldNames;
   }
 
   /**
@@ -31,8 +41,19 @@ public class ClassInspector {
    * implementowane
    */
   public static Collection<String> getAllDeclaredMethods(final Class<?> type) {
-    //TODO usuń zawartość tej metody i umieść tutaj swoje rozwiązanie
-    return Collections.emptyList();
+    Method[] methods = type.getDeclaredMethods();
+    HashSet<String> methodNames = new HashSet<>();
+    for(Method method : methods) {
+      methodNames.add(method.getName());
+    }
+    Class<?>[] interfaces = type.getInterfaces();
+    for (Class<?> iface : interfaces) {
+      Method[] interfaceMethods = iface.getDeclaredMethods();
+      for (Method method : interfaceMethods) {
+        methodNames.add(method.getName());
+      }
+    }
+    return methodNames;
   }
 
   /**
@@ -50,7 +71,14 @@ public class ClassInspector {
    * @throws Exception wyjątek spowodowany nie znalezieniem odpowiedniego konstruktora
    */
   public static <T> T createInstance(final Class<T> type, final Object... args) throws Exception {
-    //TODO usuń zawartość tej metody i umieść tutaj swoje rozwiązanie
-    return null;
+    Class<?>[] classes = new Class[args.length];
+
+    for(int i=0; i < classes.length; i++) {
+      classes[i] = args[i].getClass();
+    }
+    Constructor<T> cons = type.getDeclaredConstructor(classes);
+    cons.setAccessible(true);
+
+    return cons.newInstance(args);
   }
 }
